@@ -6,6 +6,7 @@ services:
             - '%core.table_prefix%'
             - '@user'
             - '@template'
+            - '@dispatcher'
             - '@language'
         tags:
             - { name: event.listener }

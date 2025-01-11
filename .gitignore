@@ -1,1 +1,14 @@
 .DS_Store
+config/.DS_Store
+event/.DS_Store
+language/.DS_Store
+language/en/.DS_Store
+language/ro/.DS_Store
+migrations/.DS_Store
+styles/.DS_Store
+styles/prosilver/template/.DS_Store
+styles/prosilver/template/event/.DS_Store
+styles/prosilver/theme/.DS_Store
+styles/all/template/.DS_Store
+styles/all/template/event/.DS_Store
+styles/all/theme/.DS_Store
