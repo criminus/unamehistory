@@ -1,0 +1,11 @@
+services:
+    anix.unamehistory.listener:
+        class: anix\unamehistory\event\main_listener
+        arguments:
+            - '@dbal.conn'
+            - '%core.table_prefix%'
+            - '@user'
+            - '@template'
+            - '@language'
+        tags:
+            - { name: event.listener }
