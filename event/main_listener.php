@@ -35,19 +35,19 @@ class main_listener implements EventSubscriberInterface
     /** @var \phpbb\db\driver\driver_interface */
     protected $db;
 
-    /** @var string phpEx */
+    /** @var table_prefix $templtable_prefixate */
     protected $table_prefix;
 
-    /** @var user */
+    /** @var \phpbb\user */
     protected $user;
 
-    /** @var template $template */
+    /** @var \phpbb\template\template */
     protected $template;
 
     /** @var \phpbb\event\dispatcher_interface */
     protected $phpbb_dispatcher;
 
-    /* @var \phpbb\language\language */
+    /** @var \phpbb\language\language */
     protected $language;
 
     /**
@@ -217,11 +217,12 @@ class main_listener implements EventSubscriberInterface
          *
          * @event anix.unamehistory.get_previous_usernames
          * @var   int     user_id             The ID of the user whose data is being retrieved.
-         * @var   array   username_history    Array of records containing previous usernames.
-         *                                     Each record includes 'uname_name', 'uname_date',
-         *                                     and 'screen'.
+         * @var   array   username_history      Array of records containing previous usernames.
+         *                                      Each record includes 'uname_name', 'uname_date',
+         *                                      and 'screen'.
+         * @var   int     cache_time            The cache time used for the query (default 300 seconds / 5 minutes).
          */
-        $vars = ['user_id', 'username_history'];
+        $vars = ['user_id', 'username_history', 'cache_time'];
         extract($this->phpbb_dispatcher->trigger_event('anix.unamehistory.get_previous_usernames', compact($vars)));
 
         return $username_history;
@@ -247,6 +248,8 @@ class main_listener implements EventSubscriberInterface
         $latest_record = $this->db->sql_fetchrow($result);
         $this->db->sql_freeresult($result);
 
+        $last_record = $latest_record ?: null;
+
         /**
          * This event allows data manipulation for the latest username record.
          *
@@ -257,12 +260,13 @@ class main_listener implements EventSubscriberInterface
          * @var   int     user_id         The ID of the user whose data is being retrieved.
          * @var   array   latest_record   The latest username record, containing 'uname_name',
          *                                 'uname_date', and 'screen'.
+         * @var   int     cache_time      The cache time used for the query (default 300 seconds / 5 minutes).
          */
-        $vars = ['user_id', 'latest_record'];
+        $vars = ['user_id', 'last_record', 'cache_time'];
         extract($this->phpbb_dispatcher->trigger_event('anix.unamehistory.get_latest_username', compact($vars)));
 
         // Return the record or null if no record found
-        return $latest_record ?: null;
+        return $last_record;
     }
 
     /**
@@ -294,9 +298,10 @@ class main_listener implements EventSubscriberInterface
          * @event anix.unamehistory.get_change_counter
          * @var   int     user_id         The ID of the user whose data is being retrieved.
          * @var   int     change_counter   How many times this user has changed his username until now.
+         * @var   int     cache_time      The cache time used for the query (default 300 seconds / 5 minutes).
          *
          */
-        $vars = ['user_id', 'change_counter'];
+        $vars = ['user_id', 'change_counter', 'cache_time'];
         extract($this->phpbb_dispatcher->trigger_event('anix.unamehistory.get_change_counter', compact($vars)));
 
         return $change_counter;
