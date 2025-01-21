@@ -37,6 +37,6 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, [
 	'PROFILE_PREV_USERNAMES'		=> 'Previous Usernames',
     'UH_ACP'                        => 'Admin',
-    'UH_UCP'                        => 'Profile',
+    'UH_UCP'                        => "User's Profile",
     'CHANGED_VIA'                   => 'Changed via'
 ]);

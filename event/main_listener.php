@@ -1,5 +1,4 @@
 <?php
-
 /**
  *
  * Username History. An extension for the phpBB Forum Software package.
@@ -14,7 +13,6 @@ namespace anix\unamehistory\event;
 /**
  * @ignore
  */
-
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -22,67 +20,68 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class main_listener implements EventSubscriberInterface
 {
-    public static function getSubscribedEvents()
-    {
-        return [
-            'core.user_setup'                            => 'load_language_on_setup',
-            'core.acp_users_overview_modify_data'       => 'acp_users_overview_modify_data',
-            'core.ucp_profile_reg_details_validate'     => 'ucp_profile_reg_details_validate',
+	public static function getSubscribedEvents()
+	{
+		return [
+			'core.user_setup'							=> 'load_language_on_setup',
+	        'core.acp_users_overview_modify_data'       => 'acp_users_overview_modify_data',
+            'core.ucp_profile_reg_details_sql_ary'      => 'ucp_profile_reg_details_sql_ary',
             'core.memberlist_view_profile'              => 'memberlist_view_profile'
-        ];
-    }
+		];
+	}
 
     /** @var \phpbb\db\driver\driver_interface */
     protected $db;
 
-    /** @var table_prefix $templtable_prefixate */
+    /** @var string phpEx */
     protected $table_prefix;
 
-    /** @var \phpbb\user */
+    /** @var user */
     protected $user;
 
-    /** @var \phpbb\template\template */
+    /** @var template $template */
     protected $template;
 
     /** @var \phpbb\event\dispatcher_interface */
     protected $phpbb_dispatcher;
 
-    /** @var \phpbb\language\language */
-    protected $language;
+	/* @var \phpbb\language\language */
+	protected $language;
 
-    /**
-     * Constructor
-     *
-     * @param \phpbb\language\language	$language	Language object
-     */
-    public function __construct(
+	/**
+	 * Constructor
+	 *
+	 * @param \phpbb\language\language	$language	Language object
+	 */
+	public function __construct(
         \phpbb\db\driver\driver_interface $db,
         $table_prefix,
         \phpbb\user $user,
         \phpbb\template\template $template,
         \phpbb\event\dispatcher_interface $phpbb_dispatcher,
         \phpbb\language\language $language
-    ) {
+    )
+	{
         $this->db = $db;
         $this->table_prefix = $table_prefix;
         $this->user = $user;
         $this->template = $template;
         $this->phpbb_dispatcher = $phpbb_dispatcher;
-        $this->language = $language;
-    }
+		$this->language = $language;
+	}
 
-    public function load_language_on_setup($event)
-    {
-        $lang_set_ext = $event['lang_set_ext'];
-        $lang_set_ext[] = [
-            'ext_name' => 'anix/unamehistory',
-            'lang_set' => 'common',
-        ];
-        $event['lang_set_ext'] = $lang_set_ext;
-    }
+	public function load_language_on_setup($event)
+	{
+		$lang_set_ext = $event['lang_set_ext'];
+		$lang_set_ext[] = [
+			'ext_name' => 'anix/unamehistory',
+			'lang_set' => 'common',
+		];
+		$event['lang_set_ext'] = $lang_set_ext;
+	}
 
-    public function acp_users_overview_modify_data($event)
-    {
+	public function acp_users_overview_modify_data($event)
+	{
         //Get the data we need
         $user_row = $event['user_row'];
         $data = $event['data'];
@@ -99,10 +98,9 @@ class main_listener implements EventSubscriberInterface
             $this->log_old_username($user_id, $user_row['username'], $screen);
             $this->increment_changes($user_id);
         }
-    }
+	}
 
-    public function ucp_profile_reg_details_validate($event)
-    {
+    public function ucp_profile_reg_details_sql_ary($event) {
         //Get the data we need
         $data = $event['data'];
         $current_username = $this->user->data['username'];
@@ -121,8 +119,7 @@ class main_listener implements EventSubscriberInterface
         }
     }
 
-    public function memberlist_view_profile($event)
-    {
+    public function memberlist_view_profile($event) {
         //Get the data we need
         $member = $event['member'];
         $user_id = $member['user_id'];
@@ -148,8 +145,7 @@ class main_listener implements EventSubscriberInterface
      * @param string $screen
      * @return void
      */
-    protected function log_old_username(int $user_id, string $username, string $screen = ''): void
-    {
+    protected function log_old_username(int $user_id, string $username, string $screen = ''): void {
         $sql = 'INSERT INTO ' . $this->table_prefix . 'anix_uname_history
             (uname_id, uname_name, uname_date, screen)
             VALUES ('
@@ -166,8 +162,7 @@ class main_listener implements EventSubscriberInterface
      * @param int $user_id
      * @return void
      */
-    protected function increment_changes(int $user_id): void
-    {
+    protected function increment_changes(int $user_id): void {
         $sql = 'INSERT INTO ' . $this->table_prefix . 'anix_uname_counter
             (user_id, change_counter)
             VALUES (' . intval($user_id) . ', 1)
@@ -217,12 +212,11 @@ class main_listener implements EventSubscriberInterface
          *
          * @event anix.unamehistory.get_previous_usernames
          * @var   int     user_id             The ID of the user whose data is being retrieved.
-         * @var   array   username_history      Array of records containing previous usernames.
-         *                                      Each record includes 'uname_name', 'uname_date',
-         *                                      and 'screen'.
-         * @var   int     cache_time            The cache time used for the query (default 300 seconds / 5 minutes).
+         * @var   array   username_history    Array of records containing previous usernames.
+         *                                     Each record includes 'uname_name', 'uname_date',
+         *                                     and 'screen'.
          */
-        $vars = ['user_id', 'username_history', 'cache_time'];
+        $vars = ['user_id', 'username_history'];
         extract($this->phpbb_dispatcher->trigger_event('anix.unamehistory.get_previous_usernames', compact($vars)));
 
         return $username_history;
@@ -233,8 +227,7 @@ class main_listener implements EventSubscriberInterface
      * @param int $user_id
      * @return array|null
      */
-    protected function get_latest_username(int $user_id): ?array
-    {
+    protected function get_latest_username(int $user_id): ?array {
         $cache_time = 300; // 5 minutes cache
 
         // Query the table to get the record with the highest ID for the given user
@@ -248,7 +241,7 @@ class main_listener implements EventSubscriberInterface
         $latest_record = $this->db->sql_fetchrow($result);
         $this->db->sql_freeresult($result);
 
-        $last_record = $latest_record ?: null;
+        $latest_record = $latest_record ?: null;
 
         /**
          * This event allows data manipulation for the latest username record.
@@ -260,13 +253,12 @@ class main_listener implements EventSubscriberInterface
          * @var   int     user_id         The ID of the user whose data is being retrieved.
          * @var   array   latest_record   The latest username record, containing 'uname_name',
          *                                 'uname_date', and 'screen'.
-         * @var   int     cache_time      The cache time used for the query (default 300 seconds / 5 minutes).
          */
-        $vars = ['user_id', 'last_record', 'cache_time'];
+        $vars = ['user_id', 'latest_record', 'cache_time'];
         extract($this->phpbb_dispatcher->trigger_event('anix.unamehistory.get_latest_username', compact($vars)));
 
         // Return the record or null if no record found
-        return $last_record;
+        return $latest_record;
     }
 
     /**
@@ -274,8 +266,7 @@ class main_listener implements EventSubscriberInterface
      * @param int $user_id
      * @return int
      */
-    protected function get_change_counter(int $user_id): int
-    {
+    protected function get_change_counter(int $user_id): int {
         $cache_time = 300; // 5 minutes cache
 
         $sql = 'SELECT change_counter 
@@ -298,7 +289,6 @@ class main_listener implements EventSubscriberInterface
          * @event anix.unamehistory.get_change_counter
          * @var   int     user_id         The ID of the user whose data is being retrieved.
          * @var   int     change_counter   How many times this user has changed his username until now.
-         * @var   int     cache_time      The cache time used for the query (default 300 seconds / 5 minutes).
          *
          */
         $vars = ['user_id', 'change_counter', 'cache_time'];
