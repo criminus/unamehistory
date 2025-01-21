@@ -1,4 +1,5 @@
 <?php
+
 /**
  *
  * Username History. An extension for the phpBB Forum Software package.
@@ -13,6 +14,7 @@ namespace anix\unamehistory\event;
 /**
  * @ignore
  */
+
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -20,15 +22,15 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class main_listener implements EventSubscriberInterface
 {
-	public static function getSubscribedEvents()
-	{
-		return [
-			'core.user_setup'							=> 'load_language_on_setup',
-	        'core.acp_users_overview_modify_data'       => 'acp_users_overview_modify_data',
+    public static function getSubscribedEvents()
+    {
+        return [
+            'core.user_setup'                            => 'load_language_on_setup',
+            'core.acp_users_overview_modify_data'       => 'acp_users_overview_modify_data',
             'core.ucp_profile_reg_details_sql_ary'      => 'ucp_profile_reg_details_sql_ary',
             'core.memberlist_view_profile'              => 'memberlist_view_profile'
-		];
-	}
+        ];
+    }
 
     /** @var \phpbb\db\driver\driver_interface */
     protected $db;
@@ -45,43 +47,42 @@ class main_listener implements EventSubscriberInterface
     /** @var \phpbb\event\dispatcher_interface */
     protected $phpbb_dispatcher;
 
-	/* @var \phpbb\language\language */
-	protected $language;
+    /* @var \phpbb\language\language */
+    protected $language;
 
-	/**
-	 * Constructor
-	 *
-	 * @param \phpbb\language\language	$language	Language object
-	 */
-	public function __construct(
+    /**
+     * Constructor
+     *
+     * @param \phpbb\language\language	$language	Language object
+     */
+    public function __construct(
         \phpbb\db\driver\driver_interface $db,
         $table_prefix,
         \phpbb\user $user,
         \phpbb\template\template $template,
         \phpbb\event\dispatcher_interface $phpbb_dispatcher,
         \phpbb\language\language $language
-    )
-	{
+    ) {
         $this->db = $db;
         $this->table_prefix = $table_prefix;
         $this->user = $user;
         $this->template = $template;
         $this->phpbb_dispatcher = $phpbb_dispatcher;
-		$this->language = $language;
-	}
+        $this->language = $language;
+    }
 
-	public function load_language_on_setup($event)
-	{
-		$lang_set_ext = $event['lang_set_ext'];
-		$lang_set_ext[] = [
-			'ext_name' => 'anix/unamehistory',
-			'lang_set' => 'common',
-		];
-		$event['lang_set_ext'] = $lang_set_ext;
-	}
+    public function load_language_on_setup($event)
+    {
+        $lang_set_ext = $event['lang_set_ext'];
+        $lang_set_ext[] = [
+            'ext_name' => 'anix/unamehistory',
+            'lang_set' => 'common',
+        ];
+        $event['lang_set_ext'] = $lang_set_ext;
+    }
 
-	public function acp_users_overview_modify_data($event)
-	{
+    public function acp_users_overview_modify_data($event)
+    {
         //Get the data we need
         $user_row = $event['user_row'];
         $data = $event['data'];
@@ -98,9 +99,10 @@ class main_listener implements EventSubscriberInterface
             $this->log_old_username($user_id, $user_row['username'], $screen);
             $this->increment_changes($user_id);
         }
-	}
+    }
 
-    public function ucp_profile_reg_details_sql_ary($event) {
+    public function ucp_profile_reg_details_sql_ary($event)
+    {
         //Get the data we need
         $data = $event['data'];
         $current_username = $this->user->data['username'];
@@ -119,7 +121,8 @@ class main_listener implements EventSubscriberInterface
         }
     }
 
-    public function memberlist_view_profile($event) {
+    public function memberlist_view_profile($event)
+    {
         //Get the data we need
         $member = $event['member'];
         $user_id = $member['user_id'];
@@ -145,7 +148,8 @@ class main_listener implements EventSubscriberInterface
      * @param string $screen
      * @return void
      */
-    protected function log_old_username(int $user_id, string $username, string $screen = ''): void {
+    protected function log_old_username(int $user_id, string $username, string $screen = ''): void
+    {
         $sql = 'INSERT INTO ' . $this->table_prefix . 'anix_uname_history
             (uname_id, uname_name, uname_date, screen)
             VALUES ('
@@ -162,7 +166,8 @@ class main_listener implements EventSubscriberInterface
      * @param int $user_id
      * @return void
      */
-    protected function increment_changes(int $user_id): void {
+    protected function increment_changes(int $user_id): void
+    {
         $sql = 'INSERT INTO ' . $this->table_prefix . 'anix_uname_counter
             (user_id, change_counter)
             VALUES (' . intval($user_id) . ', 1)
@@ -227,7 +232,8 @@ class main_listener implements EventSubscriberInterface
      * @param int $user_id
      * @return array|null
      */
-    protected function get_latest_username(int $user_id): ?array {
+    protected function get_latest_username(int $user_id): ?array
+    {
         $cache_time = 300; // 5 minutes cache
 
         // Query the table to get the record with the highest ID for the given user
@@ -266,7 +272,8 @@ class main_listener implements EventSubscriberInterface
      * @param int $user_id
      * @return int
      */
-    protected function get_change_counter(int $user_id): int {
+    protected function get_change_counter(int $user_id): int
+    {
         $cache_time = 300; // 5 minutes cache
 
         $sql = 'SELECT change_counter 
